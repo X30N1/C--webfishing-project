@@ -276,7 +276,23 @@ class FishingSys {
             cout << "Wybierz sprzęt, który chcesz kupić: " << endl;
             for (int i = 0; i < rods.size(); i++)
             {
-            cout << i + 1 << ". " << rods[i].name << " | Bonus do wyłowienia: " << rods[i].catchBonus << "x | Cena: " << rods[i].price << endl;
+            bool alreadyOwned = false;
+            for (const auto& ownedRod : ownedRods)
+            {
+                if (ownedRod.name == rods[i].name)
+                {
+                alreadyOwned = true;
+                break;
+                }
+            }
+            if (alreadyOwned)
+            {
+                cout << i + 1 << ". " << rods[i].name << " | Bonus do wyłowienia: " << rods[i].catchBonus << "x | Cena: " << rods[i].price << " (Posiadasz już ten sprzęt)" << endl;
+            }
+            else
+            {
+                cout << i + 1 << ". " << rods[i].name << " | Bonus do wyłowienia: " << rods[i].catchBonus << "x | Cena: " << rods[i].price << endl;
+            }
             }
             cout << rods.size() + 1 << ". Powrót" << endl;
             int choice;
@@ -293,19 +309,34 @@ class FishingSys {
             }
             else
             {
-            if (currency >= rods[choice - 1].price)
+            bool alreadyOwned = false;
+            for (const auto& ownedRod : ownedRods)
             {
-            currency -= rods[choice - 1].price;
-            pushRod(rods[choice - 1]);
-            cout << "Kupiono sprzęt: " << rods[choice - 1].name << endl;
-            pauseScreen();
-            overworldSelector();
+                if (ownedRod.name == rods[choice - 1].name)
+                {
+                alreadyOwned = true;
+                break;
+                }
+            }
+            if (alreadyOwned)
+            {
+                cout << "Posiadasz już ten sprzęt" << endl;
+                pauseScreen();
+                buyEquipment();
+            }
+            else if (currency >= rods[choice - 1].price)
+            {
+                currency -= rods[choice - 1].price;
+                pushRod(rods[choice - 1]);
+                cout << "Kupiono sprzęt: " << rods[choice - 1].name << endl;
+                pauseScreen();
+                overworldSelector();
             }
             else
             {
-            cout << "Nie masz wystarczająco pieniędzy" << endl;
-            pauseScreen();
-            overworldSelector();
+                cout << "Nie masz wystarczająco pieniędzy" << endl;
+                pauseScreen();
+                overworldSelector();
             }
             }
         }
@@ -352,7 +383,7 @@ class FishingSys {
             int fishIndex = dist(rd);
             Fish selectedFish = currentWater.fishes[fishIndex];
 
-            int chance = selectedFish.catchChance + (selectedFish.catchChance * currentRod.catchBonus);
+            int chance = selectedFish.catchChance * currentRod.catchBonus;
             int random = rd() % 100;
             cout << "Szansa złowienia ryby: " + to_string(chance) + "%" << endl;
             cout << "Wylosowana liczba: " + to_string(random) << endl;
@@ -379,9 +410,9 @@ class FishingSys {
 int main(){
 
     // Przykładowe ryby
-    Fish fish1("Karp", 30, 10);
-    Fish fish2("Szczupak", 20, 20);
-    Fish fish3("Sum", 15, 30);
+    Fish fish1("Karp", 60, 10);
+    Fish fish2("Szczupak", 40, 20);
+    Fish fish3("Sum", 50, 30);
     Fish fish4("Pstrąg", 25, 15);
     Fish fish5("Łosoś", 10, 40);
     Fish fish6("Sandacz", 5, 50);
@@ -406,12 +437,12 @@ int main(){
     // Przykładowa wędka
     Rod start("Podstawowa wędka", 1.0, 0);
     Rod drewno("Wędka z dobrej jakości drewna", 1.2, 50);
-    Rod stal("Wędka z dobrej jakości stali", 1.5, 100);
-    Rod karbon("Wędka z karbonu", 2.0, 200);
-    Rod platyna("Wędka z platyny (Chyba naprawde nie masz co robić z pieniędzmi.)", 3.0, 500);
+    Rod stal("Wędka z dobrej jakości stali", 2.1, 100);
+    Rod karbon("Wędka z karbonu", 3.0, 200);
+    Rod platyna("Wędka z platyny (Chyba naprawde nie masz co robić z pieniędzmi.)", 6.5, 500);
 
     // Dodanie wód do systemu
-    vector<Water> waters = {jezioro, rzeka, staw, ocean};
+    vector<Water> waters = {rzeka, staw, ocean};
     vector<Rod> roddies = {drewno, stal, karbon, platyna};
 
     // Uruchamiamy skrypt
